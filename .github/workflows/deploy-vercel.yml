@@ -1,0 +1,99 @@
+# .github/workflows/deploy-vercel.yml
+name: Deploy (vercel)
+
+on:
+  workflow_call:
+    inputs:
+      environment:
+        type: string
+        required: true
+      ref:
+        type: string
+        default: ''
+  workflow_dispatch:
+    inputs:
+      environment:
+        type: choice
+        options: [preview, production]
+      ref:
+        description: Commit SHA to deploy (rollback); empty = the branch head
+        type: string
+        default: ''
+
+# Needed when run by hand (workflow_dispatch); when called from ci.yml the caller's grant applies.
+permissions:
+  contents: read
+  pull-requests: write # the preview URL comment
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment:
+      name: ${{ inputs.environment }}
+      url: ${{ steps.deploy.outputs.url }}
+    # One deploy per environment at a time; a newer one waits instead of racing.
+    concurrency:
+      group: deploy-${{ inputs.environment }}-${{ inputs.environment == 'preview' && github.ref || 'main' }}
+      cancel-in-progress: false
+    env:
+      APP_VERSION: ${{ inputs.ref || github.sha }}
+      VERCEL_ORG_ID: ${{ vars.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ vars.VERCEL_PROJECT_ID }}
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      PROD: ${{ inputs.environment == 'production' && '--prod' || '' }}
+      VERCEL_ENV: ${{ inputs.environment == 'production' && 'production' || 'preview' }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.ref }}
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+
+      - name: Pull Vercel environment
+        run: pnpm exec vercel pull --yes --environment="$VERCEL_ENV" --token="$VERCEL_TOKEN"
+
+      - name: Build
+        env:
+          VITE_APP_VERSION: ${{ env.APP_VERSION }}
+        run: pnpm exec vercel build $PROD --token="$VERCEL_TOKEN"
+
+      - name: Deploy
+        id: deploy
+        run: |
+          url=$(pnpm exec vercel deploy --prebuilt $PROD --token="$VERCEL_TOKEN")
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+
+      - run: pnpm exec playwright install --with-deps chromium
+      - name: Smoke test the deployment
+        env:
+          E2E_BASE_URL: ${{ steps.deploy.outputs.url }}
+          EXPECTED_VERSION: ${{ env.APP_VERSION }}
+          # Protected previews (Deployment Protection → Protection Bypass for Automation).
+          VERCEL_AUTOMATION_BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
+        run: pnpm e2e --project=chromium --grep @smoke
+
+      # One PR comment, updated in place: found by its hidden marker, never one comment per push.
+      - name: Comment the preview URL
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v9
+        env:
+          PREVIEW_URL: ${{ steps.deploy.outputs.url }}
+          PREVIEW_SHA: ${{ github.event.pull_request.head.sha }}
+        with:
+          script: |
+            const marker = '<!-- preview-url -->';
+            const body = `${marker}\nPreview: ${process.env.PREVIEW_URL}\nCommit: ${process.env.PREVIEW_SHA}`;
+            const { owner, repo } = context.repo;
+            const issue_number = context.issue.number;
+            const comments = await github.paginate(github.rest.issues.listComments, { owner, repo, issue_number });
+            const previous = comments.find((comment) => comment.body?.includes(marker));
+            if (previous) {
+              await github.rest.issues.updateComment({ owner, repo, comment_id: previous.id, body });
+            } else {
+              await github.rest.issues.createComment({ owner, repo, issue_number, body });
+            }

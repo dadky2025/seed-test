@@ -1,0 +1,25 @@
+{
+  "app": {
+    "name": "Pocket Ledger",
+    "skipToContent": "Saltar al contenido",
+    "nav": { "home": "Inicio", "items": "Elementos" }
+  },
+  "common": { "retry": "Reintentar", "back": "Volver", "loading": "Cargando…" },
+  "errors": {
+    "network": "Sin conexión. Revisa tu red e inténtalo de nuevo.",
+    "timeout": "El servidor tardó demasiado en responder.",
+    "unauthorized": "Tu sesión ha caducado. Vuelve a iniciar sesión.",
+    "forbidden": "No tienes acceso a esto.",
+    "notFound": "No encontramos lo que buscabas.",
+    "validation": "Recibimos datos que no pudimos leer.",
+    "server": "Algo salió mal por nuestra parte.",
+    "unknown": "Algo salió mal."
+  },
+  "items": {
+    "title": "Elementos",
+    "empty": "Todavía no hay nada aquí.",
+    "count": "{count, plural, one {# elemento} other {# elementos}}",
+    "updated": "Actualizado el {date, date, medium}",
+    "notFound": "Este elemento no existe."
+  }
+}

@@ -1,0 +1,52 @@
+# Exact versions in package.json; Renovate/Dependabot move them deliberately.
+saveExact: true
+
+# Supply chain: never install a version younger than 3 days (malicious releases are usually caught and
+# unpublished within hours). Renovate uses the same delay (4.28).
+minimumReleaseAge: 4320
+
+# Dependency install scripts are blocked unless listed here. Decide each one the first `pnpm install`
+# reports — never set a blanket allow. Keep a comment with the reason for every `true`.
+allowBuilds:
+  esbuild: false # the binary ships as an optional dependency; the postinstall is not needed
+  lefthook: false # hooks are installed by the `prepare` script instead
+  msw: false # its postinstall only copies the service worker
+
+# A package published with weaker provenance than its previous version is refused.
+trustPolicy: no-downgrade
+# Known downgrades the first install reports (deploy CLIs, eslint-config-next and vitest pull several), each with its reason:
+trustPolicyExclude:
+  - vercel@60.1.3 # published without provenance by the vendor; pinned exactly
+  - '@vercel/backends@11.0.1' # trust downgrade reported by pnpm install (transitive dependency); pinned by the lockfile
+  - '@vercel/build-utils@14.13.1' # trust downgrade reported by pnpm install (transitive dependency); pinned by the lockfile
+  - '@vercel/cli-auth@0.3.9' # trust downgrade reported by pnpm install (transitive dependency); pinned by the lockfile
+  - '@vercel/cli-config@0.3.0' # trust downgrade reported by pnpm install (transitive dependency); pinned by the lockfile
+  - '@vercel/container@11.0.1' # trust downgrade reported by pnpm install (transitive dependency); pinned by the lockfile
+  - '@vercel/detect-agent@1.2.5' # trust downgrade reported by pnpm install (transitive dependency); pinned by the lockfile
+  - '@vercel/elysia@11.0.1' # trust downgrade reported by pnpm install (transitive dependency); pinned by the lockfile
+  - '@vercel/express@11.0.1' # trust downgrade reported by pnpm install (transitive dependency); pinned by the lockfile
+  - '@vercel/fastify@11.0.1' # trust downgrade reported by pnpm install (transitive dependency); pinned by the lockfile
+  - '@vercel/go@14.0.1' # trust downgrade reported by pnpm install (transitive dependency); pinned by the lockfile
+  - '@vercel/h3@11.0.1' # trust downgrade reported by pnpm install (transitive dependency); pinned by the lockfile
+  - '@vercel/hono@11.0.1' # trust downgrade reported by pnpm install (transitive dependency); pinned by the lockfile
+  - '@vercel/hydrogen@12.0.1' # trust downgrade reported by pnpm install (transitive dependency); pinned by the lockfile
+  - '@vercel/koa@11.0.1' # trust downgrade reported by pnpm install (transitive dependency); pinned by the lockfile
+  - '@vercel/nestjs@11.0.1' # trust downgrade reported by pnpm install (transitive dependency); pinned by the lockfile
+  - '@vercel/next@15.0.1' # trust downgrade reported by pnpm install (transitive dependency); pinned by the lockfile
+  - '@vercel/node@16.0.1' # trust downgrade reported by pnpm install (transitive dependency); pinned by the lockfile
+  - '@vercel/python@17.0.1' # trust downgrade reported by pnpm install (transitive dependency); pinned by the lockfile
+  - '@vercel/python-analysis@0.14.0' # trust downgrade reported by pnpm install (transitive dependency); pinned by the lockfile
+  - '@vercel/redwood@13.0.1' # trust downgrade reported by pnpm install (transitive dependency); pinned by the lockfile
+  - '@vercel/remix-builder@16.0.1' # trust downgrade reported by pnpm install (transitive dependency); pinned by the lockfile
+  - '@vercel/ruby@13.0.1' # trust downgrade reported by pnpm install (transitive dependency); pinned by the lockfile
+  - '@vercel/rust@12.0.1' # trust downgrade reported by pnpm install (transitive dependency); pinned by the lockfile
+  - '@vercel/static-build@13.0.1' # trust downgrade reported by pnpm install (transitive dependency); pinned by the lockfile
+  - 'undici@5.29.0' # trust downgrade reported by pnpm install (transitive dependency); pinned by the lockfile
+  - 'semver@6.3.1' # trust downgrade reported by pnpm install (transitive dependency); pinned by the lockfile
+  - '@vercel/static-config@3.4.3' # trust downgrade reported by pnpm install (transitive dependency); pinned by the lockfile
+  - '@vercel/oidc@3.8.9' # trust downgrade reported by pnpm install (transitive dependency); pinned by the lockfile
+  - '@vercel/cervel@0.1.70' # trust downgrade reported by pnpm install (transitive dependency); pinned by the lockfile
+  - '@vercel/error-utils@2.2.1' # trust downgrade reported by pnpm install (transitive dependency); pinned by the lockfile
+  - '@vercel/gatsby-plugin-vercel-analytics@1.0.12' # trust downgrade reported by pnpm install (transitive dependency); pinned by the lockfile
+  - '@vercel/gatsby-plugin-vercel-builder@2.2.62' # trust downgrade reported by pnpm install (transitive dependency); pinned by the lockfile
+  - '@vercel/cli-exec@1.0.1' # trust downgrade reported by pnpm install (transitive dependency); pinned by the lockfile

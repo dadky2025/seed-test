@@ -1,0 +1,5 @@
+[
+  { "id": "groceries", "title": "Groceries", "updated_at": "2026-09-20T09:30:00Z" },
+  { "id": "rent", "title": "Rent", "updated_at": "2026-09-01T08:00:00Z" },
+  { "id": "coffee", "title": "Coffee", "updated_at": "2026-09-25T16:45:00Z" }
+]

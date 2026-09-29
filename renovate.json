@@ -1,0 +1,81 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended", "helpers:pinGitHubActionDigests"],
+  "schedule": ["before 6am on monday"],
+  "minimumReleaseAge": "3 days",
+  "internalChecksFilter": "strict",
+  "rangeStrategy": "pin",
+  "lockFileMaintenance": {
+    "enabled": true,
+    "schedule": ["before 6am on the first day of the month"]
+  },
+  "automerge": false,
+  "packageRules": [
+    {
+      "groupName": "framework",
+      "matchPackageNames": [
+        "react",
+        "react-dom",
+        "@types/react",
+        "@types/react-dom",
+        "@tanstack/react-router",
+        "@tanstack/router-*",
+        "vite",
+        "@vitejs/**",
+        "@rolldown/**",
+        "babel-plugin-react-compiler"
+      ]
+    },
+    {
+      "groupName": "lint and format",
+      "matchPackageNames": [
+        "eslint",
+        "@eslint/**",
+        "typescript-eslint",
+        "eslint-plugin-*",
+        "@tanstack/eslint-plugin-query",
+        "@vitest/eslint-plugin",
+        "eslint-config-prettier",
+        "prettier",
+        "prettier-plugin-*"
+      ]
+    },
+    {
+      "groupName": "testing",
+      "matchPackageNames": [
+        "vitest",
+        "@vitest/**",
+        "@testing-library/**",
+        "jsdom",
+        "msw",
+        "@axe-core/**"
+      ]
+    },
+    {
+      "groupName": "playwright",
+      "matchPackageNames": ["@playwright/test"]
+    },
+    {
+      "description": "Node moves in .node-version and engines together.",
+      "groupName": "node",
+      "matchPackageNames": ["node", "@types/node"]
+    },
+    {
+      "description": "@types/node stays on the Node major of .node-version; its major moves with Node's, by hand.",
+      "matchPackageNames": ["@types/node"],
+      "matchUpdateTypes": ["major"],
+      "enabled": false
+    },
+    {
+      "description": "typescript-eslint's peer range caps TypeScript (Phase 2.3) — lift when it widens.",
+      "matchPackageNames": ["typescript"],
+      "allowedVersions": "<6.1.0"
+    },
+    {
+      "description": "eslint-plugin-jsx-a11y's peer range caps ESLint at 9 (Phase 2.3) — lift when it widens.",
+      "matchPackageNames": ["eslint", "@eslint/js"],
+      "allowedVersions": "<10.0.0"
+    },
+    { "groupName": "github actions", "matchManagers": ["github-actions"] }
+  ]
+}

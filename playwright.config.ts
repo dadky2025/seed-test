@@ -17,8 +17,12 @@ export default defineConfig({
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     // Vercel protected previews: the automation-bypass secret lets the smoke run through (4.23).
+    // x-vercel-skip-toolbar keeps the preview toolbar's script (blocked by our CSP) out of the smoke run.
     extraHTTPHeaders: process.env.VERCEL_AUTOMATION_BYPASS_SECRET
-      ? { 'x-vercel-protection-bypass': process.env.VERCEL_AUTOMATION_BYPASS_SECRET }
+      ? {
+          'x-vercel-protection-bypass': process.env.VERCEL_AUTOMATION_BYPASS_SECRET,
+          'x-vercel-skip-toolbar': '1',
+        }
       : undefined,
   },
   projects: [

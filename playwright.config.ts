@@ -11,14 +11,18 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: Boolean(process.env.CI),
   retries: process.env.CI ? 2 : 0,
-  reporter: process.env.CI ? [['github'], ['html', { open: 'never' }]] : [['list']],
+  reporter: process.env.CI ? [['list'], ['github'], ['html', { open: 'never' }]] : [['list']],
   use: {
     baseURL,
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     // Vercel protected previews: the automation-bypass secret lets the smoke run through (4.23).
+    // x-vercel-skip-toolbar keeps the preview toolbar's script (blocked by our CSP) out of the smoke run.
     extraHTTPHeaders: process.env.VERCEL_AUTOMATION_BYPASS_SECRET
-      ? { 'x-vercel-protection-bypass': process.env.VERCEL_AUTOMATION_BYPASS_SECRET }
+      ? {
+          'x-vercel-protection-bypass': process.env.VERCEL_AUTOMATION_BYPASS_SECRET,
+          'x-vercel-skip-toolbar': '1',
+        }
       : undefined,
   },
   projects: [
@@ -35,11 +39,15 @@ export default defineConfig({
           command: 'pnpm mock-api',
           url: 'http://localhost:4010/health',
           reuseExistingServer: !process.env.CI,
+          // pnpm does not pass Playwright's default kill on to the server, so the run never ends in CI.
+          gracefulShutdown: { signal: 'SIGTERM', timeout: 5_000 },
         },
         {
           command: 'pnpm start',
           url: baseURL,
           reuseExistingServer: !process.env.CI,
+          // pnpm does not pass Playwright's default kill on to the server, so the run never ends in CI.
+          gracefulShutdown: { signal: 'SIGTERM', timeout: 5_000 },
           timeout: 120_000,
         },
       ],

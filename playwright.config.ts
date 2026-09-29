@@ -35,11 +35,15 @@ export default defineConfig({
           command: 'pnpm mock-api',
           url: 'http://localhost:4010/health',
           reuseExistingServer: !process.env.CI,
+          // pnpm does not pass Playwright's default kill on to the server, so the run never ends in CI.
+          gracefulShutdown: { signal: 'SIGTERM', timeout: 5_000 },
         },
         {
           command: 'pnpm start',
           url: baseURL,
           reuseExistingServer: !process.env.CI,
+          // pnpm does not pass Playwright's default kill on to the server, so the run never ends in CI.
+          gracefulShutdown: { signal: 'SIGTERM', timeout: 5_000 },
           timeout: 120_000,
         },
       ],
